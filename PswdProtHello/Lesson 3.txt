@@ -1,0 +1,85 @@
+Lesson 3: If Statements
+========================================================
+
+So far, we've only made programs that run straight 
+from start to finish. However, this is rarely useful.
+Most of the time, we will want code that gets executed
+when certain conditions are met. That is where if 
+statements come in handy.
+
+In the new source code, we start by getting a username 
+and password:
+
+//Get username
+printf("%s ", "Name:");
+
+char name[32];
+fgets(name, sizeof(name), stdin);
+name[strlen(name) - 1] = 0;
+
+//Get password
+printf("%s ", "Password:");
+
+char pswd[32];
+fgets(pswd, sizeof(pswd), stdin);
+pswd[strlen(pswd) - 1] = 0;
+
+Then we use an if statement to verify the user's
+credentials:
+
+//Verify credentials
+if(strcmp(name, "Dylan") == 0 && strcmp(pswd, "cheetah") == 0)
+{
+    printf("Hello %s!\n", name);
+}
+else
+{
+    printf("You're not allowed here %s!\n", name);
+}
+
+An if statement is used to execute a block of code if a
+given condition is true:
+
+if(condition)
+{
+    //Code
+}
+
+And the following else block is executed if the 
+condition is false:
+
+else
+{
+    //Code
+}
+
+In this case, the condition is:
+
+strcmp(name, "Dylan") == 0 && strcmp(pswd, "cheetah") == 0
+
+"strcmp" compares two strings and returns 0 if they are
+equal. "==" is used to compare two numbers and finally
+"&&" means "and". So the condition reads 
+"name is Dylan and pswd is cheetah".
+
+We have two different messages to display based on the 
+user's input:
+
+printf("Hello %s!\n", name);
+...
+printf("You're not allowed here %s!\n", name);
+
+C has many comparison operators:
+
+== - equals
+!= - does not equal
+< - less than
+> - greater than
+<= - less than or equal to
+>= - greater than or equal to
+
+And logic operators:
+
+&& - and
+|| - or
+! - not

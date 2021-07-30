@@ -1,0 +1,333 @@
+Lesson 6: Files
+========================================================
+
+In the last 2 lessons, we have been steadily improving
+our password verifying program. However, what if we need
+to add more usrs? We could modify the source code and 
+rebuild it, but there is a better way. We can store the 
+user data inside a configuration file. Config files have 
+this format:
+
+[Section]
+variable = value
+...
+
+Now, we just need a way to load the file and parse it.
+Parsing is the process of breaking down data to analyze 
+it. However, there is one slight problem we must solve:
+
+const User users[] = {...};
+
+Remember how we created a users array in the last 
+lesson? This won't work when we need to load data from 
+a file. Consider this:
+
+const User users[5];
+
+If we do this, we can load up to 5 users, however we 
+won't be able to add more than 5. This time we will 
+need to use a dynamically allocted array:
+
+User *users = NULL;
+
+This method allows us to create an array that can 
+hold as many users as the config file contains, as 
+long as we have enough memory left. But now this 
+expression won't work either:
+
+sizeof(users) / sizeof(User)
+
+We will need to keep track of the size of the array 
+ourselves:
+
+int userCnt;
+
+Also, a dynamic array has to be created and destroyed 
+manually. So let's start by creating a function that 
+initializes the data structures our program needs:
+
+bool Init(void)
+{
+    //Load user data
+    printf("%s", "Loading user data...");
+
+    if(!LoadUsers())
+    {
+        printf("%s\n", "failed");
+        fprintf(stderr,
+            "%s\n",
+            "Fatal Error: Failed to load user data.");
+        return false;
+    }
+
+    printf("%s\n", "ok");
+
+    //Register with atexit
+    atexit(Fini);
+    return true;
+}
+
+The "Init" function calls the "LoadUsers" function and 
+if it fails it prints a message to "stderr" (also known
+as the standard error stream) and returns false. Next it 
+registers the "Fini" function with "atexit". The "Fini" 
+function will destroy the users array. Any function that 
+has been registered with "atexit" will be called before 
+the program terminates:
+
+void Fini(void)
+{
+    //Free user data
+    FreeUsers();
+}
+
+Our "Fini" function simply calls the "FreeUsers" 
+function.
+
+Now, let's take a look at the first few lines of our 
+"LoadUsers" function:
+
+FILE *usrCfg = fopen("./data/users.cfg", "r");
+
+if(usrCfg == NULL)
+{
+    return false;
+}
+
+"fopen" is used to open a file. The first parameter 
+is the path to the file and the second parameter is 
+the file mode. The file mode can be "r" (read), 
+"w" (write), "a" (append), "w+" (update). Append is 
+used to add to the end of the file and update is 
+"read and/or write". The return value is a file 
+pointer. If the function fails, it returns NULL and 
+our function returns false.
+
+Next, we need to find the "Users" section of our 
+config file:
+
+char line[64] = "";
+
+while(strncmp(line, "[Users]", 7) != 0)
+{
+    //Get next line
+    fgets(line, sizeof(line), usrCfg);
+
+    //Fail if no users section
+    if(feof(usrCfg))
+    {
+        return false;
+    }
+}
+
+We create a character array that holds 64 chars and 
+store an empty string in it. Then we have a while 
+loop that continues until the array starts with the 
+"[Users]" section header. The "strncmp" function works
+similar to the "strcmp" function, however it only 
+compares a given number of chars. Inside the loop, we 
+fetch the next line with "fgets" and if we reach the 
+end of the file before we find the "Users" section, we 
+return false.
+
+Notice how this time we read from "usrCfg" instead of 
+"stdin"? That is how you read a line from a file that 
+you opened. The "feof" function returns true if we 
+have reached the end of the given file.
+
+Next, we need to parse the user count and store it 
+in the "userCnt" variable:
+
+if(fscanf(usrCfg, "count = %i ", &userCnt) < 1)
+{
+    fprintf(stderr, 
+        "%s\n",
+        "Fatal Error: User config file is corrupt.");
+    return false;
+}
+
+The "fscanf" function works similar to the "printf" 
+function, however it gets input instead of producing
+output. For each placeholder code in the format 
+string, we must give a pointer to a variable to fill
+with input. In this case we are reading a line like 
+this:
+
+count = 5
+
+So we need a format string like this:
+
+"count = %i "
+
+And we are reading into "userCnt". The return value 
+of "fscanf" is the number of fields that were 
+successfully parsed. If the return value is less 
+than the number of placeholder codes in the format 
+string, then parsing failed and we print an error 
+message to "stderr" and return false. Please note 
+that "fprintf" allows you to give the file to print 
+output to. Please note that the "%i" in the format 
+string means an integer.
+
+Now we need to create the users array:
+
+users = (User*)malloc(sizeof(User) * userCnt);
+
+if(users == NULL)
+{
+    fprintf(stderr,
+        "%s\n",
+        "Fatal Error: Out of memory.");
+    return false;
+}
+
+The "malloc" function allocates a block of memory 
+that is the given size. If it fails, it returns 
+NULL and we print an error message and return false.
+The amount of memory required by an array is equal to:
+
+sizeof(type) * numberOfElements
+
+Also notice this expression:
+
+(User*)
+
+That expression is called a cast. A cast is used to 
+change the type of a piece of data. Since malloc 
+returns a "void *", we must cast it to the type of 
+pointer we need. I also want to point out that I 
+have modified the User structure:
+
+typedef struct
+{
+    char name[32];
+    char pswd[32];
+} User;
+
+Notice how I changed the members from pointers to arrays? 
+That is because we will need somewhere to store the 
+data we read from the file and we can't use the "line" 
+array permanently since it's contents change every time 
+we read a line of the file.
+
+Now we need to parse the rest of the file:
+
+int i = 0;
+
+while(i < userCnt)
+{
+    //Get next line
+    fgets(line, sizeof(line), usrCfg);
+
+    //User entry?
+    if(strncmp(line, "[User]", 6) == 0)
+    {
+        //Load user data
+        if(fscanf(usrCfg, "name = %31s pswd = %31s ", 
+            users[i].name, users[i].pswd) < 2)
+        {
+            free(users);
+            fclose(usrCfg);
+            fprintf(stderr,
+                "%s\n",
+                "Fatal Error: Failed to parse user data.");
+            return false;
+        }
+
+        i++;
+    }
+    //Corrupt garbage
+    else
+    {
+        free(users);
+        fclose(usrCfg);
+        fprintf(stderr,
+            "%s\n",
+            "Fatal Error: User config file is corrupt.");
+        return false;
+    }
+}
+
+We will be using a while loop for this task:
+
+while(condition)
+{
+    //Code
+}
+
+A while loop repeatedly executes a block of code while 
+a given condition remains true. In this case, the 
+condition is:
+
+i < usrCnt 
+
+We set i to 0 above the loop and we will use it to 
+keep track of how many user entries we have parsed so 
+far.
+
+The first thing we need to do in the loop is get the 
+next line of the file.
+
+"else if" is like an if statement within an "else" 
+block. If the line starts with "[User]", then we 
+need to load the next user. We will use fscanf 
+again, but with a different format string:
+
+"name = %31s pswd = %31s"
+
+"%31s" means a string that is up to 31 chars long.
+The reason why we use 31 instead of 32 (the length
+of the name and password fields) is because "fscanf"
+needs an additional char to store the null char
+which marks the end of the string. Also, notice that 
+this time we are parsing 2 lines from the file. 
+Hence the 2 " " chars. And we are going to place 
+both strings directly into the next user struct 
+name and pswd members:
+
+users[i].name
+users[i].pswd
+
+And again we need to check if the correct number of 
+fields were parsed. But this time if parsing fails, 
+we must free the users array and close the file 
+before we display the error message and return. 
+
+The "free" function frees memory that we allocated 
+with "malloc". You must always free memory that you 
+allocated when you no longer need it. And likewise 
+you must close each file you opened, as soon as you 
+are done with it.
+
+"fclose" closes the given file.
+
+If we successfully parse a user entry, we need to 
+increment i. And if the line isn't blank or a user 
+entry, then we free the users array, close the file, 
+and report that the file is corrupt.
+
+If we successfully parse the entire file, we need to 
+close it and return true.
+
+The "FreeUsers" function is much simpler:
+
+void FreeUsers(void)
+{
+    free(users);
+}
+
+It simply frees the users array.
+
+And finally we need to add this to the beginning of 
+our "main" function:
+
+if(!Init())
+{
+    return 1;
+}
+
+This code calls the "Init" function and returns one 
+if it returns false. The value returned from the 
+"main" function is called an exit code. 0 means no 
+errors and anything else means some sort of error 
+occurred.

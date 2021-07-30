@@ -1,0 +1,95 @@
+Lesson 1: Output
+========================================================
+
+In this series of tutorials, we are going to learn how 
+to write programs using the C programming language. 
+Every program starts out as source code which is 
+preprocessed, compiled, assembled, and linked to create 
+a program. Every programming language has it's own syntax. 
+I will be describing the syntax that C uses as we go 
+through the tutorials. I will also be describing how to 
+use many of the most useful C functions. For best 
+results, follow along with the tutorial source code as 
+you read each lesson.
+
+For our first lesson, we will be writing a simple 
+program that simply displays "Hello World!" on the 
+screen.
+
+The first thing you need to learn is how to leave notes
+in your programs. Notes in source code are called 
+comments. It may not seem important, but leaving notes
+in your programs will help you remember what each part 
+does. Especially if you don't do anything with the code
+for a while. In C, a line comment begins with two 
+slahses:
+
+//line comment
+
+And a block comment begins with "/*" and ends with "*/":
+
+/*
+Block comment.
+Some more notes.
+And some more...
+*/
+
+I find it useful to separate sections of my programs 
+with a heading followed by some equal signs:
+
+//Heading
+//====================================================
+
+Next, I will describe preprocessor directives. A
+preprocessor directive is a line that causes the
+source code to be modified by the preprocessor just
+before the code is compiled. The first and most 
+important directive is called "#include". The
+include directive adds the contents of another file to
+your source code. In this tutorial, we have one
+include directive:
+
+#include <stdio.h>
+
+This includes the "stdio.h" header which contains the
+definition of the "printf" function. Notice how
+the filename is enclosed in angle brackets? It can
+also be enclosed in double quotes. Usually, angle 
+brackets are used for all of the standard C headers.
+
+Next, is the entry point function:
+
+int main(int argc, char **argv)
+{
+    ...
+}
+
+The entry point function gets called after the 
+program starts. Every application must have an entry
+point. I will talk more about how functions work in 
+a later lession.
+
+The "main" function contains 2 statements:
+
+printf("%s\n", "Hello World!");
+return 0;
+
+"printf" prints formatted text to the standard 
+output stream (also known as "stdout"). The first
+parameter is called a format string. It tells
+printf how to format the text. "%s" means a string,
+"\n" means a new line. The remaining parameters
+are the pieces of data referred to in the format
+string. In this case, we just need a string. A 
+string is just another word for text data. In C,
+a string is an array of characters like 'a', 'b',
+'1', '&', etc.
+
+"return" returns from the current function. If 
+the function has a return value, it must follow 
+the "return" keyword.
+
+When you build and run the program, it should
+display this:
+
+Hello World!

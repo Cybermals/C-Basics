@@ -1,0 +1,139 @@
+Lesson 5: For Loops
+========================================================
+
+In the last 2 lessons, we designed a program that 
+verifies a username and password. However, it still only
+supports one valid user. Most programs like this support 
+many users. So in this lesson, we will add support for 
+multiple users.
+
+First, we will need a place to store the name and 
+password for each user. The best solution is to use an 
+array:
+
+char *names[] = {
+    "Dylan",
+    "Fiona",
+    "Daniel",
+    "Leila",
+    "Serena"
+};
+
+However, this approach would require a second array to 
+store the passwords:
+
+char *pswds[] = {
+    "cheetah",
+    "fox",
+    "lion",
+    "lioness",
+    "squirrel"
+};
+
+Using 2 arrays would work, however there is a better way
+to do this. We can create an array that stores both as 
+structures:
+
+typedef struct
+{
+    char *name;
+    char *pswd;
+} User;
+
+User users[] = {
+    {"Dylan", "cheetah"},
+    {"Fiona", "fox"},
+    {"Daniel", "lion"},
+    {"Leila", "lioness"},
+    {"Serena", "squirrel"}
+};
+
+A structure is simply a group of variables that are stored 
+together. Each variable inside the structure is called a 
+member:
+
+typedef struct
+{
+    //members
+} name;
+
+Once you've declared a structure, you can use it anywhere 
+you can use a normal type. Did you notice how the array 
+declaration didn't have a size? If you give an array an 
+initial vale, the size is determined by the number of 
+elements inside the curly braces:
+
+type name[] = {elements};
+
+Also notice that each element in the example has a pair 
+of strings inside curly braces. This is because a 
+structure can also have an initial value. A normal
+variable can have one as well:
+
+type name = value;
+
+Since the users array shouldn't be modified by the
+program, we will make it constant:
+
+const User users[] = {...};
+
+The "const" keyword prevents the variables value from 
+changing.
+
+Since we now have multiple users, we will need to 
+modify our "IsValid" function so it will check every 
+name/password combination:
+
+bool IsValid(char *name, char *pswd)
+{
+    //Verify password
+    for(int i = 0; i < sizeof(users) / sizeof(User); i++)
+    {
+        //Found username?
+        if(strcmp(name, users[i].name) == 0)
+        {
+            return (strcmp(pswd, users[i].pswd) == 0);
+        }
+    }
+
+    return false;
+}
+
+A for loop is used to execute a block of code for a set 
+number of times:
+
+for(initializer; condition; update)
+{
+    //Code
+}
+
+The initializer creates a variable to count with and sets 
+it's initial value. The code gets repeated while the 
+condition remains true. The update is executed after each 
+iteration of the for loop. In this case we set i to 0,
+loop while i is less than the size of the array, and 
+increment i after each iteration.
+
+Notice how this time we calculate the size of the array 
+with this code:
+
+sizeof(users) / sizeof(User)
+
+The reason we do this is because "sizeof" returns the 
+size of the array in bytes NOT elements. So we need to 
+divide by the size of each element.
+
+The increment operator "++" simply adds one to the value 
+of a variable. There is also a decrement operator "--" 
+that subtracts one.
+
+Also notice that I changed "Dylan" to "users[i].name" 
+and "cheetah" to "users[i].pswd". That is because we 
+need to compare the name and password with each 
+name/password pair in the users array. The "." is called 
+the "member of" operator. It is used to access the value 
+of a member:
+
+struct.member
+
+No changes were made to the other functions this time.

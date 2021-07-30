@@ -1,0 +1,127 @@
+Lesson 4: Functions
+========================================================
+
+In the last lesson, we made a program that verifies a 
+username and password. For this lesson, we will be 
+improving the program by creating our own functions.
+
+A function is like a program within a program. Whenever
+you call a function, the computer jumps to the code 
+inside the function and executes it. Then, when it 
+reaches the end of the function or executes a return, 
+it returns to the part of the program that called the
+function and continues.
+
+For this example, we will need the bool data type from
+the "stdbool.h" header as well as the "stdio.h" and 
+"string.h" headers:
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
+Next, we have a function declaration:
+
+void Prompt(char *msg, char *buf, int bufSize)
+{
+    //Display prompt
+    printf("%s ", msg);
+
+    //Get input
+    fgets(buf, bufSize, stdin);
+    buf[strlen(buf) - 1] = 0;
+}
+
+The "Prompt" function simply contains the code for 
+displaying a prompt and getting user input, so we 
+don't have to keep repeating the same lines of code 
+every time we need to ask for the user to type 
+something.
+
+To delare a function, we simply put it's return type 
+followed by it's name and then a list of parameters 
+enclosed in parenthesis:
+
+type name(parameters)
+{
+    ...
+}
+
+The code for the function is enclosed in curly braces. 
+In this case, we declared a "Prompt" function that takes
+3 parameters "msg", "buf", and "bufSize". A parameter is
+a variable that gets passed to a function. Variables 
+that were created within a function are called locals. 
+Locals get deleted when the function returns. A 
+function can only access parameters and locals that 
+belong to it. It cannot access variables that belong to 
+another function.
+
+Did you notice how "msg" and "buf" have an "*" in front 
+of their name? That is becuase they are pointers. A 
+pointer is a variable that contains the location of 
+another variable. Normally, the value of each variable 
+gets copied when we pass it as a parameter. However, 
+copying arrays is inefficient, so instead we pass arrays 
+by reference rather than value. Also, if we modified an 
+array that was passed by value, the original array 
+would be left unchanged.
+
+Please note that if you want to pass a variable by 
+reference that isn't a type of array, you must use the 
+address of operator "&". Here is a short example:
+
+void GetCursorPos(int *x, int *y)
+{
+    ...
+}
+...
+int x, y;
+GetCursorPos(&x, &y);
+
+We can access the value referenced by a pointer by using 
+the dereference operator "*":
+
+*x = 5;
+*y = 10;
+
+Unless it's an array:
+
+buf[0] = 'a';
+
+Next, we have a function called "IsValid". It simply 
+checks the username and password and returns true if they 
+are valid:
+
+bool IsValid(char *name, char *pswd)
+{
+    //Verify password
+    if(strcmp(name, "Dylan") == 0)
+    {
+        return (strcmp(pswd, "cheetah") == 0);
+    }
+
+    return false;
+}
+
+Notice how we return the result of the password 
+comparison if the name is valid?
+
+Adding these new functions allows us to make the 
+"main" function much neater and easier to read:
+
+//Get credentials
+char name[32];
+char pswd[32];
+Prompt("Name:", name, sizeof(name));
+Prompt("Pswd:", pswd, sizeof(pswd));
+
+//Verify credentials
+if(IsValid(name, pswd))
+{
+    printf("Hello %s!\n", name);
+}
+else
+{
+    printf("You're not allowed here %s!\n", name);
+}

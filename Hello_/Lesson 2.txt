@@ -1,0 +1,89 @@
+Lesson 2: Input
+========================================================
+
+In the last lesson, we learned how to display text on
+the screen. However, most programs need to get input 
+from the user. In this lesson, we will learn how to get
+user input.
+
+We will need to use a function from the "string.h"
+header this time, so we will include it as well as 
+"stdio.h":
+
+#include <stdio.h>
+#include <string.h>
+
+The first thing we need to do, is display a prompt:
+
+printf("%s ", "Name: ");
+
+A prompt is a message that tells the user what to type.
+Notice how we don't have a new line this time? That 
+is because we want the user's input to follow the
+prompt string. However, we do have a space to
+separate the user's input from the prompt string 
+visually.
+
+Next, we create an array of 32 characters to hold the
+user's input:
+
+char buf[32];
+
+An array is a sequence of consecutive data. An array 
+is also a type of variable. A variable is a piece of 
+data that is stored in the memory. In C, the syntax
+for creating a variable is:
+
+type name;
+
+And for an array:
+
+type name[size];
+
+Next, we call "fgets" to get input from the user:
+
+fgets(buf, sizeof(buf), stdin);
+
+"fgets" reads up to a given number of characters 
+from the given stream and writes them into the given
+array until it encounters a newline or EOF character. 
+In this case the number of characters is "sizeof(buf)" 
+(the size of the array), the stream is "stdin" 
+(also known as the standard input stream), and the 
+array is "buf".
+
+Next, we remove the newline character from the array:
+
+buf[strlen(buf) - 1] = 0;
+
+Since the newline character is the the last character 
+in the array, we need to calculate the index of the 
+last character. An index is a number that refers to 
+the position of a piece of data (element) in an array. 
+For example, the first element of "buf" is "0". We 
+place the index in brackets after the name of an array 
+when we want to access an element:
+
+array[index]
+
+The index of an array element is always one less than
+it's position:
+
+index = position - 1
+
+So the index of the 5th element is 4. The index of the 
+last element of a character array is the length of the 
+string it contains minus one.
+
+"strlen" returns the length of the string in the given 
+character array.
+
+Setting the last character of a string to 0 removes it 
+from the string.
+
+Finally, we say hello to the user by calling "printf":
+
+printf("Hello %s!\n", buf);
+
+Did you notice how each statement ends with a ";"? In C,
+every statement must end with a semicolon.
